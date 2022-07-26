@@ -1,6 +1,4 @@
-﻿// TETRIS.cpp : Ten plik zawiera funkcję „main”. W nim rozpoczyna się i kończy wykonywanie programu.
-//
-#include <SFML/Graphics.hpp>
+﻿#include <SFML/Graphics.hpp>
 #include "Tetris.h"
 #include <chrono>
 #include <iostream>
@@ -14,8 +12,9 @@ int main()
         BOARD_SIZE.x,
         BOARD_SIZE.y,
         CELL_SIZE,
-        AUTO_UPDATE_TIME,
-        DEFAULT_CELL_COLOR);
+        &CALCULATOR,
+        DEFAULT_CELL_COLOR,
+        FONT_NAME);
 
     game.add_new_tetroid(i_shape, sf::Color::Red);
     game.add_new_tetroid(o_shape, sf::Color::Yellow);
@@ -79,7 +78,7 @@ int main()
         stop = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = stop - start;
 
-        if (elapsed.count() >= AUTO_UPDATE_TIME)
+        if (elapsed.count() >= game.get_fall_iteration() * 1000)
         {
             game.update(tetris::Tetris::Action::move_tetroid_down);
             start_clock = true;

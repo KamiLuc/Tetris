@@ -1,5 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Tetris_calculator.h"
 
 const sf::Vector2f GAME_ON_SCREEN_POSITION { 5.f, 5.f };
 
@@ -13,8 +14,9 @@ const char* WINDOW_TITLE = "Tetris!";
 
 const sf::Color DEFAULT_CELL_COLOR{ 26, 8, 31 };
 
-//TIME IN MILISEC
-const double AUTO_UPDATE_TIME = 500;
+static Original_tetris_calculator CALCULATOR;
+
+const std::string& FONT_NAME{ "ARCADECLASSIC.ttf" };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 using tetroid = std::vector<std::vector<sf::Vector2i>>;

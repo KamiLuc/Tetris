@@ -3,15 +3,16 @@
 #include <SFML/Graphics.hpp>
 #include <ranges>
 #include <set>
+#include <iostream>
 
 using namespace tetris;
 
-Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, double auto_update_time, const sf::Color& default_cell_color) :
+Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, Level_delay_score_calculator* calculator, const sf::Color& default_cell_color, const std::string& font_name) :
 	cell_size(cell_size),
 	size_x(board_x_size),
 	size_y(board_y_size),
 	default_cell_color(default_cell_color),
-	auto_update_time(auto_update_time)
+	calculator(calculator)
 {
 	using rectangle_array = std::unique_ptr<sf::RectangleShape[]>;
 
@@ -46,6 +47,17 @@ Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_
 		}
 	}
 
+	if (!text_font.loadFromFile(font_name))
+	{
+		throw std::exception("FONT NOT LOADED");
+	}
+
+	game_info.setFont(text_font);
+	game_info.setCharacterSize(55);
+	game_info.setPosition(365.f, 200.f);
+	game_info.setFillColor(sf::Color::Magenta);
+	game_info.setOutlineColor(sf::Color::White);
+	game_info.setLetterSpacing(3.f);
 	srand(time(NULL));
 }
 
@@ -92,6 +104,11 @@ void Tetris::reset() noexcept
 	tetroid = nullptr;
 	fake_tetroid = nullptr;
 	next_tetroid = nullptr;
+	level = 1;
+	lines_completed = 0;
+	score = 0;
+	free_fall = 0;
+	fall_iteration = 0.5;
 	next_tetroid_shift = 0;
 	for (const auto& point : taken_cells)
 	{
@@ -202,11 +219,11 @@ void tetris::Tetris::destroy_tetroid() noexcept
 	tetroid = nullptr;
 }
 
-void tetris::Tetris::try_to_clear_lines() noexcept
+unsigned int tetris::Tetris::try_to_clear_lines() noexcept
 {
 	if (taken_cells.empty())
 	{
-		return;
+		return 0;
 	}
 
 	taken_cells.sort([](std::pair<sf::Vector2i, sf::Color> a,
@@ -219,6 +236,8 @@ void tetris::Tetris::try_to_clear_lines() noexcept
 	int counter = 0;
 	auto iterator = taken_cells.cbegin();
 	int now_counting = (*iterator).first.y;
+
+	unsigned int lines_cleared = 0;
 
 	while (iterator != taken_cells.cend())
 	{
@@ -251,9 +270,25 @@ void tetris::Tetris::try_to_clear_lines() noexcept
 				now_counting = (*iterator).first.y;
 				counter = 1;
 			}
+
+			lines_cleared++;
 		}
 		iterator++;
 	}
+
+	return lines_cleared;
+}
+
+void tetris::Tetris::update_game_info() noexcept
+{
+	std::string temp{ "SCORE\n" };
+	temp += std::to_string(score);
+	temp += "\nLINES\nCLEARED\n";
+	temp += std::to_string(lines_completed);
+	temp += "\nLEVEL\n";
+	temp += std::to_string(level);
+
+	game_info.setString(temp);
 }
 
 bool Tetris::move_tetroid_down()
@@ -289,6 +324,13 @@ void tetris::Tetris::shift_next_tetroid()
 			move_next_tetroid_right();
 		}
 	}
+}
+
+void tetris::Tetris::update_level_iteration_score() noexcept
+{
+	level = calculator->calculate_level(lines_completed);
+	fall_iteration = calculator->calculate_iteration_time(level);
+	score += calculator->calculate_point_award(level, free_fall);
 }
 
 void Tetris::add_new_tetroid(std::vector<std::vector<sf::Vector2i>>&& tetroid_cell_states, const sf::Color& tetroid_color)
@@ -404,6 +446,7 @@ void tetris::Tetris::update(Action action)
 	//this is true only at first update
 	if (next_tetroid == nullptr)
 	{
+		update_game_info();
 		next_tetroid = std::make_unique<Tetroid>(get_random_tetroid());
 		shift_next_tetroid();
 	}
@@ -413,6 +456,7 @@ void tetris::Tetris::update(Action action)
 	{
 		auto temp_tetroid = *next_tetroid;
 		tetroid = std::make_unique<Tetroid>(temp_tetroid);
+		free_fall = 0;
 		next_tetroid = std::make_unique<Tetroid>(get_random_tetroid());
 		shift_next_tetroid();
 		if (check_if_tetroid_is_colliding(*tetroid))
@@ -429,6 +473,7 @@ void tetris::Tetris::update(Action action)
 			if (action == Action::move_tetroid_down)
 			{
 				move_tetroid_down();
+				free_fall++;
 			}
 			else
 			{
@@ -441,6 +486,9 @@ void tetris::Tetris::update(Action action)
 			if (check_if_tetroid_is_colliding(copy))
 			{
 				destroy_tetroid();
+				update_level_iteration_score();
+				lines_completed += try_to_clear_lines();
+				update_game_info();
 				tetroid = nullptr;
 			}
 		}
@@ -472,7 +520,6 @@ void tetris::Tetris::update(Action action)
 				next_tetroid_shift++;
 		}
 	}
-	try_to_clear_lines();
 	paint_board();
 	paint_next_tetroid_board();
 }
@@ -494,4 +541,6 @@ void Tetris::draw(sf::RenderTarget& target, sf::RenderStates states) const
 			target.draw(next_tetroid_board[i][j], states);
 		}
 	}
+
+	target.draw(game_info, states);
 }

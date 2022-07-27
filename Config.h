@@ -14,9 +14,18 @@ const char* WINDOW_TITLE = "Tetris!";
 
 const sf::Color DEFAULT_CELL_COLOR{ 26, 8, 31 };
 
-static Original_tetris_calculator CALCULATOR;
+ Original_tetris_calculator CALCULATOR;
 
+//////////////////////////////////////////////////////
 const std::string& FONT_NAME{ "ARCADECLASSIC.ttf" };
+
+const unsigned int TETRIS_TEXT_CHARACTER_SIZE = 55;
+
+const sf::Vector2f TETRIS_TEXT_POSITION{ 365.f, 200.f };
+
+const sf::Color TETRIS_TEXT_COLOR{ sf::Color::Magenta };
+//////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 using tetroid = std::vector<std::vector<sf::Vector2i>>;

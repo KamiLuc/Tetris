@@ -7,7 +7,7 @@
 
 using namespace tetris;
 
-Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, Level_delay_score_calculator* calculator, const sf::Color& default_cell_color, const std::string& font_name) :
+Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, Level_delay_score_calculator* calculator, const sf::Color& default_cell_color, const Text_options& text_options) :
 	cell_size(cell_size),
 	size_x(board_x_size),
 	size_y(board_y_size),
@@ -47,16 +47,7 @@ Tetris::Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_
 		}
 	}
 
-	if (!text_font.loadFromFile(font_name))
-	{
-		throw std::exception("FONT NOT LOADED");
-	}
-
-	game_info.setFont(text_font);
-	game_info.setCharacterSize(55);
-	game_info.setPosition(365.f, 200.f);
-	game_info.setFillColor(sf::Color::Magenta);
-	game_info.setOutlineColor(sf::Color::White);
+	text_options.Load_text_options(game_info);
 	game_info.setLetterSpacing(3.f);
 	srand(time(NULL));
 }
@@ -104,6 +95,7 @@ void Tetris::reset() noexcept
 	tetroid = nullptr;
 	fake_tetroid = nullptr;
 	next_tetroid = nullptr;
+	game_over = false;
 	level = 1;
 	lines_completed = 0;
 	score = 0;
@@ -461,6 +453,7 @@ void tetris::Tetris::update(Action action)
 		shift_next_tetroid();
 		if (check_if_tetroid_is_colliding(*tetroid))
 		{
+			game_over = true;
 			reset();
 			return;
 		}

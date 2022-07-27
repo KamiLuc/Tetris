@@ -23,5 +23,6 @@ double Original_tetris_calculator::calculate_iteration_time(unsigned int level)
 
 unsigned int Original_tetris_calculator::calculate_point_award(unsigned int level, unsigned int free_fall_iteration)
 {
-	return (21 + (3 * level)) - free_fall_iteration;
+	return (21 + (3 //7 
+		* level)) - free_fall_iteration;
 }

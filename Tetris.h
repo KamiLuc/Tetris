@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include "Tetroid.h"
 #include "Tetris_calculator.h"
+#include "Text_options.h"
 #include <list>
 
 namespace tetris
@@ -35,6 +36,7 @@ namespace tetris
 		unsigned int lines_completed = 0;
 		unsigned int free_fall = 0;
 		double fall_iteration = 0.5;
+		bool game_over = false;
 
 		Tetroid get_random_tetroid() const;
 		void colour_cells(const std::vector<sf::Vector2i>& points, const sf::Color& color);
@@ -66,12 +68,13 @@ namespace tetris
 		
 
 	public:
-		Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, Level_delay_score_calculator* calculator, const sf::Color& default_cell_color = sf::Color::White, const std::string& font_name = "ARCADECLASSIC.ttf");
+		Tetris(const sf::Vector2f& on_screen_pos, int board_x_size, int board_y_size, float cell_size, Level_delay_score_calculator* calculator, const sf::Color& default_cell_color, const Text_options& text_options);
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		void reset() noexcept;
 		auto get_board_start_position() const noexcept { return board[0][0].getPosition(); }
 		void add_new_tetroid(std::vector<std::vector<sf::Vector2i>>&& tetroid_cell_states, const sf::Color& tetroid_color);
 		void add_new_tetroid(const std::vector<std::vector<sf::Vector2i>>& tetroid_cell_states, const sf::Color& tetroid_color);
+		bool is_game_over() const noexcept { return game_over; }
 		enum class Action
 		{
 			move_tetroid_down,

@@ -2,11 +2,20 @@
 #include "Tetris.h"
 #include <chrono>
 #include <iostream>
+#include "Text_options.h"
 #include "Config.h"
 
 int main()
 {
+    sf::Font font;
+    font.loadFromFile("ARCADECLASSIC.ttf");
     sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), WINDOW_TITLE);
+
+    const Text_options TETRIS_TEXT_OPTIONS(TETRIS_TEXT_POSITION.x,
+        TETRIS_TEXT_POSITION.y,
+        &font,
+        TETRIS_TEXT_CHARACTER_SIZE,
+        TETRIS_TEXT_COLOR);
 
     tetris::Tetris game(GAME_ON_SCREEN_POSITION,
         BOARD_SIZE.x,
@@ -14,7 +23,7 @@ int main()
         CELL_SIZE,
         &CALCULATOR,
         DEFAULT_CELL_COLOR,
-        FONT_NAME);
+        TETRIS_TEXT_OPTIONS);
 
     game.add_new_tetroid(i_shape, sf::Color::Red);
     game.add_new_tetroid(o_shape, sf::Color::Yellow);
@@ -25,7 +34,6 @@ int main()
     game.add_new_tetroid(t_shape, { 25, 224, 211 });
 
     sf::Event event;
-    using namespace std::chrono_literals;
     std::chrono::steady_clock::time_point start, stop;
     bool start_clock = true;
 

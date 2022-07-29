@@ -5,12 +5,12 @@
 
 class Text_options
 {
-private:
+protected:
 	std::string text_string;
 	float message_xpos;
 	float message_ypos;
 	sf::Font* font;
-	int font_size;
+	unsigned int font_size;
 	sf::Color text_color;
 public:
 	Text_options(float message_xpos = 0, float message_ypos = 0,
